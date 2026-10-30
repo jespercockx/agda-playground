@@ -84,7 +84,6 @@ interface AgdaVersionSpec {
   path: string;
   compressedPath?: string;
   byteLength?: number;
-  stdlibCandidates: string[];
   // Zip archive to unpack to the initial drive. Agda 2.8 still runs
   // `--setup`, but this archive also carries primitive interfaces.
   dataPath?: string;
@@ -124,7 +123,6 @@ export const agdaVersionMap = Object.fromEntries(
       path: withCacheBust(asset(spec.path), spec.cacheBust),
       compressedPath: withCacheBust(asset(spec.compressedPath), spec.cacheBust),
       byteLength: spec.byteLength,
-      stdlibCandidates: [...spec.stdlibCandidates],
       dataPath: withCacheBust(asset(spec.data.path), spec.cacheBust),
       stdlibPath: withCacheBust(asset(spec.stdlib.path), spec.cacheBust),
     } satisfies AgdaVersionSpec,

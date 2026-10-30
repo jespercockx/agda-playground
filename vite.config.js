@@ -41,11 +41,7 @@ export default defineConfig(async ({ command }) => {
     server: {
       port: 5173,
       watch: {
-        ignored: [
-          "**/.build-tmp/**",
-          "**/.compiler-toolchain/**",
-          "**/research/**",
-        ],
+        ignored: ["**/.build-tmp/**"],
       },
     },
     define: {

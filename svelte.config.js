@@ -17,7 +17,7 @@ const config = {
   },
   kit: {
     adapter: adapter({ precompress: false }),
-    // Deployed under a subpath on GitHub Pages (e.g. /plfa-playground); the
+    // Deployed under a subpath on GitHub Pages (e.g. /my-agda-site); the
     // Pages workflow sets BASE_PATH to the repository name. Empty locally.
     paths: {
       base: process.env.BASE_PATH ?? "",

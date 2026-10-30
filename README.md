@@ -123,30 +123,29 @@ This is off by default (identity). The worked example
 
 The Agda compiler and language server are a 33 MB WASI executable (about 10 MB
 over the wire as gzip). It is **not** committed to this repository. Instead,
-`runtime` in `playground.config.json` pins one or more releases of
+`runtime` in `playground.config.json` pins a release of
 [`jespercockx/agda-als-dist`](https://github.com/jespercockx/agda-als-dist), and
-`scripts/sync-runtime.mjs` downloads them:
+`scripts/sync-runtime.mjs` downloads it:
 
 ```json
 "runtime": {
   "repository": "jespercockx/agda-als-dist",
-  "releases": ["v2.8.0-als-e6541f8"]
+  "release": "v2.8.0-als-e6541f8"
 }
 ```
 
-Before `npm run dev` and `npm run build`, the script fetches each release's
+Before `npm run dev` and `npm run build`, the script fetches the release's
 `dist-manifest.json`, checks every artifact against the byte length and SHA-256
 it records, and copies them into `static/`. Downloads are cached under
 `.runtime-cache/` (gitignored), so later builds are offline; CI caches the same
 directory.
 
-Add `"manifestSha256": "<hash>"` (per release, or at the top level for a single
-release) to authenticate the tag itself by pinning the manifest bytes. It is
-optional: without it the manifest is fetched on every run and only the artifact
-hashes inside it are trusted.
+Add `"manifestSha256": "<hash>"` to authenticate the tag itself by pinning the
+manifest bytes. It is optional: without it the manifest is fetched on every run
+and only the artifact hashes inside it are trusted.
 
-To bump the runtime, change the tag in `runtime.releases` (and update
-`manifestSha256` if you use it). Only **Agda 2.8.0 and later** are supported:
+To bump the runtime, change `runtime.release` (and update `manifestSha256` if you
+use it). Only **Agda 2.8.0 and later** are supported:
 earlier releases predate the `--setup` primitive installer and the
 `_build/<version>/agda/` interface layout the runtime relies on. See the dist
 repo's [`UPDATING.md`](https://github.com/jespercockx/agda-als-dist/blob/main/UPDATING.md)
