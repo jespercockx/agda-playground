@@ -172,12 +172,27 @@ standard library and every earlier chapter:
 npm run precompile:content -- /path/to/agda-2.8.0
 ```
 
-It refreshes the deduplicated archives under `static/content/interfaces/` and the
-dependency index. The script checks with whatever `agda` is on `PATH` by default;
-pass the path to a matching binary as shown, or point `AGDA` at it. Skip this step
-if you do not have a native Agda of the pinned version, or if you prefer to keep
-your repository free of precompiled data: everything still works, just with a
-slower first check.
+It writes the deduplicated archives and the generated dependency index under
+`static/content/interfaces/`. The script checks with whatever `agda` is on `PATH`
+by default; pass the path to a matching binary as shown, or point `AGDA` at it.
+Skip this step if you do not have a native Agda of the pinned version, or if you
+prefer to keep your repository free of precompiled data: everything still works,
+just with a slower first check.
+
+This is a local, one-off step, not part of the build: nothing downloads Agda for
+you, and the deploy workflow only ships what is committed. To include the
+archives in a GitHub Pages deployment, commit them after generating:
+
+```sh
+git add static/content/interfaces
+git commit -m "Add precompiled content interfaces"
+```
+
+`.gitignore` un-ignores that directory for exactly this reason, so a fresh clone
+or CI build copies the committed archives into `build/` unchanged. Re-run the
+step whenever your content or the pinned Agda version changes — the archives are
+keyed to both, and a stale one is ignored rather than misused. If you never run
+it, the directory stays absent and the first check compiles from source.
 
 ### Standard-library interfaces
 
