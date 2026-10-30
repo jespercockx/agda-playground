@@ -154,14 +154,36 @@ for how a release is produced.
 For an air-gapped mirror or local testing, `PLAYGROUND_RUNTIME_BASE_URL`
 overrides the GitHub download base, with the release tag appended.
 
-## Standard-library interfaces
+## Precompiling interfaces
 
-Agda recompiles a standard-library module from source unless it finds a
-precompiled interface (`.agdai`) for it, and a broad import such as
-`import Data.Nat` pulls in a large part of the library — minutes on the first
-check. The `interfaces` setting fetches those files on demand instead: Agda
-decides which interface it wants, and only the ones a check needs are fetched,
-one request per file.
+Agda recompiles a module from source unless it finds a precompiled interface
+(`.agdai`) for it, and a broad import such as `import Data.Nat` pulls in a large
+part of the library — minutes on the first check. Two mechanisms avoid that:
+precompiling your own content with a local Agda, and fetching the standard
+library's interfaces on demand.
+
+### Precompiling your own content
+
+With a native Agda of the matching version available, the optional fast path
+precompiles per-chapter archives so the first visit does not type-check the
+standard library and every earlier chapter:
+
+```sh
+npm run precompile:content -- /path/to/agda-2.8.0
+```
+
+It refreshes the deduplicated archives under `static/content/interfaces/` and the
+dependency index. The script checks with whatever `agda` is on `PATH` by default;
+pass the path to a matching binary as shown, or point `AGDA` at it. Skip this step
+if you do not have a native Agda of the pinned version, or if you prefer to keep
+your repository free of precompiled data: everything still works, just with a
+slower first check.
+
+### Standard-library interfaces
+
+The `interfaces` setting fetches the standard library's interfaces on demand
+instead of compiling them: Agda decides which interface it wants, and only the
+ones a check needs are fetched, one request per file.
 
 - `{ "mode": "none" }` — never fetch; compile everything from source. This is
   what the starter ships. Omitted `interfaces` behaves like this.
@@ -180,22 +202,6 @@ one request per file.
 Interfaces are version-specific: the tree must be built by the same Agda version
 the site ships. A missing or mismatched file is ignored and Agda compiles that
 module normally, so a partial or stale tree costs time, never correctness.
-
-### Optional: precompiling site content
-
-The same idea applies to *your* content and the standard library it imports. With
-a native Agda of the matching version on `PATH`, the optional fast path
-precompiles per-chapter archives so the first visit does not type-check the
-standard library and every earlier chapter:
-
-```sh
-npm run precompile:content -- /path/to/agda-2.8.0
-```
-
-It refreshes the deduplicated archives under `static/content/interfaces/` and the
-dependency index. Skip it if you do not ship a native Agda of the pinned version,
-or if you prefer to keep your repository free of precompiled data; everything
-still works, just with a slower first check.
 
 ## Build and verify
 
