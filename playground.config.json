@@ -6,7 +6,8 @@
   "source": "https://github.com/jespercockx/agda-playground",
   "runtime": {
     "repository": "jespercockx/agda-als-dist",
-    "release": "v2.8.0-als-e6541f8"
+    "release": "v2.8.0-als-e6541f8",
+    "manifestSha256": "385a89ada6b450d1e78e3ab96f6c8dcc49d3fdafd438d3e66cae2c4ddce81e9a"
   },
   "interfaces": {
     "mode": "same-origin"

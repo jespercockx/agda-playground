@@ -35,8 +35,8 @@ export const runtimeManifest = [
     stdlibVersion: "2.3",
     path: "/als-2.8ext.wasm",
     compressedPath: "/als-2.8ext.wasm.gz",
-    byteLength: 32998899,
-    cacheBust: "629af8a86004",
+    byteLength: 32938388,
+    cacheBust: "b96572c035e4",
     data: {
       path: "/agda-data.zip",
       byteLength: 574839,
