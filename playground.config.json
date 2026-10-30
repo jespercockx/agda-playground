@@ -10,6 +10,6 @@
     "manifestSha256": "385a89ada6b450d1e78e3ab96f6c8dcc49d3fdafd438d3e66cae2c4ddce81e9a"
   },
   "interfaces": {
-    "mode": "same-origin"
+    "mode": "none"
   }
 }

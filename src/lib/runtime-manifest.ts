@@ -29,22 +29,20 @@ export interface RuntimeVersionSpec {
   stdlib: RuntimeStdlibSpec;
 }
 
-export const runtimeManifest = [
-  {
-    agdaVersion: "2.8.0",
-    stdlibVersion: "2.3",
-    path: "/als-2.8ext.wasm",
-    compressedPath: "/als-2.8ext.wasm.gz",
-    byteLength: 32938388,
-    cacheBust: "b96572c035e4",
-    data: {
-      path: "/agda-data.zip",
-      byteLength: 574839,
-      interfaceDir: "lib/prim/_build/2.8.0/agda",
-    },
-    stdlib: {
-      path: "/agda-stdlib-2.3.zip",
-      byteLength: 1972500,
-    },
+export const runtimeManifest = {
+  agdaVersion: "2.8.0",
+  stdlibVersion: "2.3",
+  path: "/als-2.8ext.wasm",
+  compressedPath: "/als-2.8ext.wasm.gz",
+  byteLength: 32938388,
+  cacheBust: "b96572c035e4",
+  data: {
+    path: "/agda-data.zip",
+    byteLength: 574839,
+    interfaceDir: "lib/prim/_build/2.8.0/agda",
   },
-] as const satisfies readonly RuntimeVersionSpec[];
+  stdlib: {
+    path: "/agda-stdlib-2.3.zip",
+    byteLength: 1972500,
+  },
+} as const satisfies RuntimeVersionSpec;

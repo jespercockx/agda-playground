@@ -109,7 +109,7 @@ plus-zero (suc n) = cong suc {! plus-zero n !}
       stdin: SPSC.allocateArrayBuffer(1024 * 1024),
       stdout: SPSC.allocateArrayBuffer(1024 * 1024),
     },
-    agdaVersion: runtimeManifest[0].agdaVersion,
+    agdaVersion: runtimeManifest.agdaVersion,
   });
   const sourceLanguageCompartment = new Compartment();
 

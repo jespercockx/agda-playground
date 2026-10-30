@@ -100,7 +100,7 @@ When `modulePrefix` is omitted it defaults to `library`.
 | `order` | Explicit chapter order per group |
 | `playgroundSource` | Initial text of the built-in editor document; `""` opens a blank `Main.agda` |
 | `dependencies` | Agda library dependencies of the generated project (default `["standard-library"]`) |
-| `runtime` | Which `agda-als-dist` release(s) to download (see below) |
+| `runtime` | Which `agda-als-dist` release to download (see below) |
 | `interfaces` | Standard-library interface mode (see below) |
 | `importRewrite` | Optional import-rewrite map (see below) |
 
@@ -163,13 +163,13 @@ check. The `interfaces` setting fetches those files on demand instead: Agda
 decides which interface it wants, and only the ones a check needs are fetched,
 one request per file.
 
-- `{ "mode": "same-origin" }` — what this starter ships. `sync:runtime`
-  downloads the release's interface archive at build time and extracts it into
-  `static/stdlib-interfaces/<agdaVersion>/`; the site serves it and therefore
-  carries the whole tree (about 190 MB of files). Reloads reuse the interfaces
-  from IndexedDB and make no further requests.
-- `{ "mode": "none" }` — never fetch; compile everything from source. Omitted
-  `interfaces` behaves like this.
+- `{ "mode": "none" }` — never fetch; compile everything from source. This is
+  what the starter ships. Omitted `interfaces` behaves like this.
+- `{ "mode": "same-origin" }` — `sync:runtime` downloads the release's interface
+  archive at build time and extracts it into `static/stdlib-interfaces/<agdaVersion>/`;
+  the site serves it and therefore carries the whole tree (about 190 MB of
+  files). Reloads reuse the interfaces from IndexedDB and make no further
+  requests. Switch this on once your content imports the standard library.
 - `{ "mode": "cross-origin", "baseUrl": "https://…" }` — fetch each interface
   from `baseUrl` at runtime. `baseUrl` must be a **CORS host** serving the tree
   as `<baseUrl>/src/<Module>.agdai`. A GitHub release asset will not work:
@@ -255,10 +255,11 @@ one long-lived interaction process.
   `Cross-Origin-Embedder-Policy: require-corp`. GitHub Pages cannot set response
   headers, so the bundled `static/coi-serviceworker.js` supplies them, at the
   cost of one automatic reload on the first visit.
-- **Per-site build size.** With `interfaces.mode: "same-origin"` (the default)
-  every deployment carries the full ~190 MB interface tree, even if no visitor
-  imports the standard library. `cross-origin` (host nothing) and `none` (fetch
-  nothing) are the alternatives.
+- **Per-site build size.** `interfaces.mode: "same-origin"` makes every
+  deployment carry the full ~190 MB interface tree, even if no visitor imports
+  the standard library. The starter ships `none` (fetch nothing) to keep the
+  build small; `cross-origin` (host nothing, fetch from a CORS host) is the
+  other alternative.
 - **Vite cap.** `vite` is held below 8.3 on purpose; see the comment in
   `package.json`. Bumping it silently breaks the WASM worker.
 
