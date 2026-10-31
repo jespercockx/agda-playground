@@ -281,6 +281,16 @@ src/                     the SvelteKit app
 static/                  generated and static assets
 .github/workflows/       CI and GitHub Pages deploy
 ```
+## Origins and credits
+
+The browser-native Agda playground began as
+[`agda-web/als-demo`](https://github.com/agda-web/als-demo) by Andy Pan. This
+repository started as a fork of
+[`SeungheonOh/plfa-playground`](https://github.com/SeungheonOh/plfa-playground)
+by [Seungheon Oh](https://github.com/SeungheonOh), who built the original
+in-browser PLFA playground on top of it — many thanks for that work. 
+A version of the PLFA playground based on the template in this repository can be found at
+[`jespercockx/agda-playground`](https://github.com/jespercockx/agda-playground).
 
 ## License and notices
 
