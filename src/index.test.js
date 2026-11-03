@@ -1,8 +1,12 @@
 /// <reference types="vitest/globals" />
 
-import { CompletionContext } from "@codemirror/autocomplete";
+import { CompletionContext, acceptCompletion } from "@codemirror/autocomplete";
 import { EditorState } from "@codemirror/state";
-import { agdaCompletionSource } from "$lib/codemirror/completion";
+import { keymap } from "@codemirror/view";
+import {
+  agdaCompletionSource,
+  agdaCompletions,
+} from "$lib/codemirror/completion";
 import { browserAgdaSource } from "$lib/agda/browser-source";
 import config from "../playground.config.json";
 
@@ -23,6 +27,19 @@ describe("Agda completion", () => {
   it("suggests exports from open builtin imports", () => {
     const result = complete("open import Agda.Builtin.Bool\ntr");
     expect(result.options.map((option) => option.label)).toContain("true");
+  });
+
+  it("accepts completions with Tab instead of Enter", () => {
+    const state = EditorState.create({ extensions: agdaCompletions() });
+    const bindings = state.facet(keymap).flat();
+    expect(bindings.find((binding) => binding.key === "Tab")?.run).toBe(
+      acceptCompletion,
+    );
+    expect(
+      bindings.some(
+        (binding) => binding.key === "Enter" && binding.run === acceptCompletion,
+      ),
+    ).toBe(false);
   });
 });
 

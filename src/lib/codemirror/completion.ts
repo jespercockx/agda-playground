@@ -1,8 +1,12 @@
-import { EditorState, type Extension } from "@codemirror/state";
-import type {
-  Completion,
-  CompletionContext,
-  CompletionResult,
+import { EditorState, Prec, type Extension } from "@codemirror/state";
+import { keymap } from "@codemirror/view";
+import {
+  acceptCompletion,
+  autocompletion,
+  completionKeymap,
+  type Completion,
+  type CompletionContext,
+  type CompletionResult,
 } from "@codemirror/autocomplete";
 
 const KEYWORDS = [
@@ -161,8 +165,22 @@ export function agdaCompletionSource(
   };
 }
 
+// Accept a completion with Tab instead of Enter. Enter then falls through to
+// the default newline binding, so it no longer replaces the word under the
+// cursor with the first suggestion.
+const completionKeymapWithTab = [
+  ...completionKeymap.filter((binding) => binding.key !== "Enter"),
+  { key: "Tab", run: acceptCompletion },
+];
+
 export function agdaCompletions(): Extension {
-  return EditorState.languageData.of(() => [
-    { autocomplete: agdaCompletionSource },
-  ]);
+  return [
+    EditorState.languageData.of(() => [
+      { autocomplete: agdaCompletionSource },
+    ]),
+    // basicSetup already installs autocompletion() with its default keymap;
+    // turn that off and install our own that accepts on Tab.
+    autocompletion({ defaultKeymap: false }),
+    Prec.highest(keymap.of(completionKeymapWithTab)),
+  ];
 }
