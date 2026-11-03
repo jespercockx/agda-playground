@@ -8,6 +8,7 @@ import {
   agdaCompletions,
 } from "$lib/codemirror/completion";
 import { browserAgdaSource } from "$lib/agda/browser-source";
+import { hasNewInteractionPoints } from "$lib/agda/handlers";
 import config from "../playground.config.json";
 
 function complete(source, explicit = true) {
@@ -52,5 +53,13 @@ answer = {!  !}
     expect(
       browserAgdaSource("/Main.agda", source, config.importRewrite),
     ).toBe(source);
+  });
+});
+
+describe("interaction-point reload decision", () => {
+  it("detects holes introduced by a give or refine", () => {
+    expect(hasNewInteractionPoints([0], [{ id: 0 }, { id: 1 }])).toBe(true);
+    expect(hasNewInteractionPoints([2, 5], [{ id: 2 }, { id: 5 }])).toBe(false);
+    expect(hasNewInteractionPoints([], [{ id: 3 }])).toBe(true);
   });
 });

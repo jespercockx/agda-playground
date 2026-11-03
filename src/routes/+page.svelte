@@ -691,7 +691,10 @@ plus-zero (suc n) = cong suc {! plus-zero n !}
     if (!compilerReady || isBusy) return true;
     void runAction(async () => {
       if (workspaceMode === "content") await ensureContentInterfaces();
-      await controller.loadAgdaFile();
+      // An explicit check always re-loads, even when the buffer matches the
+      // last checked snapshot: an interaction (give/refine) can leave the
+      // highlighting stale without changing the source again.
+      await controller.loadAgdaFile(true);
     });
     return true;
   }

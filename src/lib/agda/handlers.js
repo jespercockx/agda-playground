@@ -20,8 +20,25 @@ import { buildGoalTransaction, getAgdaGoalById } from "./goals";
  * @prop {boolean} showImplicitArgs
  * @prop {boolean} showIrrelevantArgs
  * @prop {string | undefined} pendingExpression
+ * @prop {number[]} interactionPoints
+ * @prop {'give' | 'makeCase' | undefined} pendingInteraction
+ * @prop {boolean} pendingInteractionReload
  * @prop {() => void} [onInteractionEdit]
  */
+
+/**
+ * Did Agda report an interaction point the editor did not know about before
+ * this command? Give/refine report the resulting holes with ranges anchored at
+ * the start of the file (see `InteractionPoints` below), so a new point means
+ * we cannot place it from Agda's data.
+ *
+ * @param {number[]} previousIds
+ * @param {Agda._InteractionPoint[]} current
+ */
+export function hasNewInteractionPoints(previousIds, current) {
+  const known = new Set(previousIds);
+  return current.some((ip) => !known.has(ip.id));
+}
 
 /** @typedef {(
  *  | 'ResponseHighlightingInfoDirect' | 'ResponseHighlightingInfoIndirect'
@@ -145,6 +162,35 @@ export function makeLSPResponseHandlerMap(controller, editorView) {
       });
     },
     InteractionPoints({ interactionPoints }) {
+      const pending = controller.pendingInteraction;
+      controller.pendingInteraction = undefined;
+
+      // Goals are placed from the ranges Agda reports, but two commands leave
+      // those ranges pointing at the wrong place:
+      //
+      // - Give/refine parse the expression from `startPos` because the client
+      //   sends `noRange` (see `Controller.give`), so a hole the expression
+      //   introduces is reported at the start of the file, not where it was
+      //   inserted.
+      // - Case-split rewrites whole clauses, so the surviving ranges belong to
+      //   the pre-split text.
+      //
+      // Emacs sidesteps both by re-scanning the buffer for `?`/`{! !}` after
+      // every response instead of trusting these ranges; here we re-check the
+      // file, which re-parses the inserted `?` at its real position. Revisit
+      // if the extra check proves too frequent or too slow.
+      if (pending === "makeCase") {
+        controller.pendingInteractionReload = true;
+        return;
+      }
+      if (
+        pending === "give" &&
+        hasNewInteractionPoints(controller.interactionPoints, interactionPoints)
+      ) {
+        controller.pendingInteractionReload = true;
+        return;
+      }
+
       editorView.dispatch(
         buildGoalTransaction(editorView.state, interactionPoints),
       );
@@ -167,6 +213,7 @@ export function makeLSPResponseHandlerMap(controller, editorView) {
         changes: { from: goal.from, to: goal.to, insert: replacement },
         selection: { anchor: goal.from + replacement.length },
       });
+      controller.pendingInteraction = "give";
       controller.onInteractionEdit?.();
     },
     MakeCase({ interactionPoint, clauses }) {
@@ -187,6 +234,7 @@ export function makeLSPResponseHandlerMap(controller, editorView) {
         changes: { from: line.from, to: line.to, insert: source },
         selection: { anchor: line.from + source.length },
       });
+      controller.pendingInteraction = "makeCase";
       controller.onInteractionEdit?.();
     },
   };

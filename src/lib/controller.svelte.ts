@@ -215,6 +215,8 @@ export class AgdaController {
   lastAction = $state("Waiting for Agda");
   lastCheckDurationMs = $state<number | undefined>();
   pendingExpression: string | undefined;
+  pendingInteraction: "give" | "makeCase" | undefined;
+  pendingInteractionReload = false;
   pendingCheckStartedAt: number | undefined;
   pendingGoalCheck = false;
   loadedSnapshot?: { filePath: string; source: string };
@@ -581,7 +583,7 @@ export class AgdaController {
     });
   }
 
-  async loadAgdaFile() {
+  async loadAgdaFile(force = false) {
     if (this.alsWorkerStatus !== "active") {
       throw new Error("Agda is still starting");
     }
@@ -590,6 +592,7 @@ export class AgdaController {
     if (source == null) throw new Error("The Agda editor is not ready");
 
     if (
+      !force &&
       this.loadedSnapshot?.filePath === this.currentFilePath &&
       this.loadedSnapshot.source === source &&
       !this.problems.some((problem) => problem.severity === "error")
@@ -783,6 +786,10 @@ export class AgdaController {
     if (!this.lspClient || this.alsWorkerStatus !== "active") {
       throw new Error("Agda is not ready");
     }
+    // A pending interaction (see `handlers.js`) is only meaningful until the
+    // command it belongs to ends; drop any stale one so it cannot make a
+    // later `Cmd_load` look like a give that needs re-checking.
+    this.pendingInteraction = undefined;
     const encodedFilePath = JSON.stringify(this.currentFilePath);
     return this.lspClient.request("agda", {
       tag: "CmdReq",
@@ -978,6 +985,20 @@ export class AgdaController {
         : this.checked
           ? "Checked successfully"
           : "Ready";
+
+      // A give/refine that introduced a hole, or a case-split, left the
+      // interaction-point ranges unusable (see the `InteractionPoints` handler
+      // in `handlers.js`). Re-check the file so Agda re-parses it.
+      if (this.pendingInteractionReload) {
+        this.pendingInteractionReload = false;
+        // Clearing the snapshot forces a real `Cmd_load`: `loadAgdaFile` would
+        // otherwise return early as "already checked" or take the fast
+        // single-goal path.
+        this.loadedSnapshot = undefined;
+        void this.loadAgdaFile().catch((error) =>
+          console.warn("Could not re-check after an interaction", error),
+        );
+      }
       return;
     }
     if (tag !== "ResponseJSONRaw" || !contents) return;
